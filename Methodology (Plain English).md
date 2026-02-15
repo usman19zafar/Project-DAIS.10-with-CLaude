@@ -285,31 +285,43 @@ Decay rates by tier:
 - Enrichment: Fast decay (half-life: 14 days)
 ```
 ```python
-import math
-from typing import Union
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
-def temporal_decay(
-    t: Union[int, float],
-    s0: Union[int, float],
-    decay_rate: Union[int, float]
-) -> float:
-    """
-    Tier-dependent temporal decay model.
+# Parameters
+s0 = 6
+decay_rate = 0.6
 
-    s(t) = s0 * e^(-λt)
+def temporal_decay(t, s0, decay_rate):
+    return s0 * np.exp(-decay_rate * t)
 
-    Parameters:
-        t (float): Time since last valid observation
-        s0 (float): Initial importance score
-        decay_rate (float): Tier-specific decay constant (λ)
+# Create figure
+fig, ax = plt.subplots()
+ax.set_xlim(0, 10)
+ax.set_ylim(0, s0)
+ax.set_xlabel("Time (t)")
+ax.set_ylabel("Importance s(t)")
+ax.set_title("Tier-Dependent Temporal Decay")
 
-    Returns:
-        float: Decayed importance score
-    """
-    if t < 0:
-        raise ValueError("Time t must be non-negative")
+line, = ax.plot([], [], lw=2)
 
-    return s0 * math.exp(-decay_rate * t)
+t_vals = np.linspace(0, 10, 200)
+
+def update(frame):
+    t = t_vals[:frame]
+    y = temporal_decay(t, s0, decay_rate)
+    line.set_data(t, y)
+    return line,
+
+ani = animation.FuncAnimation(
+    fig,
+    update,
+    frames=len(t_vals),
+    interval=40
+)
+
+ani.save("temporal_decay.gif", writer="pillow")
 ```
 
 **Real-world example:**
